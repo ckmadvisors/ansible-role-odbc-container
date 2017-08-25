@@ -6,6 +6,7 @@
   yum:
     name: "{{ item }}"
     state: installed
+    update_cache: yes
   with_items: "{{ yum_odbc_packages }}"
   when: ansible_os_family == "RedHat"
   tags: odbc, packages
@@ -14,6 +15,7 @@
   apt:
     name: "{{ item }}"
     state: installed
+    update_cache: yes
   with_items: "{{ apt_odbc_packages }}"
   when: ansible_os_family == "Debian"
   tags: odbc, packages
@@ -48,3 +50,11 @@
 
 - name: Run ldconfig in case any dynamically linked libraries have been added
   command: /sbin/ldconfig
+
+- name: Clean yum cache
+  command: yum clean all
+  when: ansible_os_family == rh_fam
+
+- name: Clean apt cache
+  command: apt-get clean
+  when: ansible_os_family == deb_fam
