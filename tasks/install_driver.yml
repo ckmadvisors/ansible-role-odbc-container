@@ -1,0 +1,58 @@
+---
+
+- name: Install packages through apt if specified
+  apt:
+    name: "{{ driver.apt_packages }}"
+    update_cache: yes
+    state: installed
+  when: ansible_os_family == "Debian" and driver.apt_packages is defined and driver.apt_packages|length > 0
+  tags: odbc, packages
+
+- name: Install packages through yum if specified
+  yum:
+    name: "{{ driver.yum_packages }}"
+    update_cache: yes
+    state: installed
+  when: ansible_os_family == "RedHat" and driver.yum_packages is defined and driver.yum_packages|length > 0
+  tags: odbc, packages
+
+- name: Include custom tasks file if specified
+  include: "/src/{{ snippet_dir }}/{{ driver.tasks_snippet }}"
+  when: driver.tasks_snippet is defined and driver.tasks_snippet
+
+- name: Create any extra directories specified for this driver
+  file:
+    state: directory
+    path: "{{ item }}"
+  with_items: "{{ driver.extra_dirs }}"
+  when: driver.extra_dirs is defined and driver.extra_dirs|length > 0
+
+- name: Inject any extra files specified for this driver
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    mode: "{{ item.mode | default(omit) }}"
+  with_items: "{{ driver.extra_files }}"
+  when: driver.extra_files is defined and driver.extra_files|length > 0
+
+- name: Install ODBC driver binaries if provided
+  copy:
+    src: "{{ driver.binary_src }}/{{ item }}"
+    dest: "{{ driver.binary_dest }}/{{ item }}"
+  with_items: "{{ driver.binary_files }}"
+  when: driver.binary_files is defined and driver.binary_files|length > 0
+  tags: odbc
+
+- name: Set any specified softlinks 
+  file:
+      path: "{{ item.path }}"
+      src: "{{ item.src }}"
+      state: link
+      force: "{{ item.force | default(omit) }}"
+  with_items: "{{ driver.extra_softlinks }}"
+  when: driver.extra_softlinks is defined and driver.extra_softlinks|length > 0
+
+- name: Append any env_vars from this driver to env vars dictionary
+  set_fact:
+    env_vars: "{{ env_vars|combine(driver.env_vars) }}"
+  when: driver.env_vars is defined and driver.env_vars

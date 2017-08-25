@@ -1,11 +1,42 @@
+---
+
 ODBC_USER: root
+ODBC_GROUP: root
 
-ODBC: "/etc/odbc.ini"
-ODBCINST: "/etc/odbcinst.ini"
+ODBCINST_TEMPLATE: "odbcinst.ini.j2"
+ODBC_TEMPLATE: "odbc.ini.j2"
 
-ODBCINST_TEMPLATE: "/src/templates/odbcinst.ini.j2"
-ODBC_TEMPLATE: "/src/templates/odbc.ini.j2"
+# Define ODBC-packages
+yum_odbc_packages:
+    - unixODBC
+    - unixODBC-devel
 
-odbc_packages:
+apt_odbc_packages:
     - unixodbc
     - unixodbc-dev
+
+env_vars_file: /etc/bash.bashrc
+env_vars:
+  ODBCINI: "{{ odbc_file }}"
+
+# Custom odbc entries to be added
+dsn_connections: []
+
+# snippets and driver settings
+snippet_dir: "snippets"
+dsn_snippets: []
+
+base_drivers:
+  - name: "FreeTDS"
+    inst_snippet: "tds_driver.part.j2"
+    apt_packages:
+      - freetds-dev
+      - tdsodbc
+      - freetds-bin  
+    yum_packages:
+      - freetds
+      - freetds-devel
+
+extra_drivers: []
+
+drivers: "{{ base_drivers + extra_drivers }}"

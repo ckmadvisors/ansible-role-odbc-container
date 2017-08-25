@@ -2,21 +2,49 @@
   with_items: "{{ var_files }}"
   when: var_files is defined and var_files
 
-- name: Install packages required for ODBC
-  apt:
-    update_cache: yes
+- name: Install yum packages required for ODBC
+  yum:
     name: "{{ item }}"
     state: installed
-  with_items: "{{ odbc_packages }}"
+  with_items: "{{ yum_odbc_packages }}"
+  when: ansible_os_family == "RedHat"
+  tags: odbc, packages
+
+- name: Install apt packages required for ODBC
+  apt:
+    name: "{{ item }}"
+    state: installed
+  with_items: "{{ apt_odbc_packages }}"
+  when: ansible_os_family == "Debian"
+  tags: odbc, packages
+
+- include: install_driver.yml
+  with_items: "{{ drivers }}"
+  loop_control:
+    loop_var: driver
 
 - name: Write custom ODBC driver configuration
   template:
     src: "{{ ODBCINST_TEMPLATE }}"
-    dest: "{{ ODBCINST }}"
+    dest: "{{ inst_file }}"
     mode: 0644
 
 - name: Write custom ODBC DSN listing
   template:
     src: "{{ ODBC_TEMPLATE }}"
-    dest: "{{ ODBC }}"
+    dest: "{{ odbc_file }}"
+    owner: "{{ ODBC_USER }}"
+    group: "{{ ODBC_GROUP }}"
     mode: 0644
+
+- name: Set environment variables in specified location
+  lineinfile: 
+    line: 'export {{ item.key }}="{{ item.value }}"'
+    state: present
+    dest: "{{ env_vars_file }}"
+  with_dict: "{{ env_vars }}"
+  tags:
+    - odbc
+
+- name: Run ldconfig in case any dynamically linked libraries have been added
+  command: /sbin/ldconfig

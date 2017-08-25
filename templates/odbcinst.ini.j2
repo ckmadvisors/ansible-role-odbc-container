@@ -1,0 +1,12 @@
+; Don't edit manually!
+; {{ ansible_managed }}
+
+{% if drivers|length != 0 %}
+; driver file snippets
+{% for driver in drivers %}
+{% if driver.inst_snippet %}
+{% include snippet_dir + "/" + driver.inst_snippet %}
+{% endif %}
+
+{% endfor %}
+{% endif %}
