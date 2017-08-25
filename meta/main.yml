@@ -13,7 +13,6 @@ galaxy_info:
   - name: Ubuntu
     versions:
       - trusty
-      - 14.04
   - name: Debian
     versions:
       - jessie
