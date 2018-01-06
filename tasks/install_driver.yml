@@ -17,7 +17,7 @@
   tags: odbc, packages
 
 - name: Include custom tasks file if specified
-  include: "/src/{{ snippet_dir }}/{{ driver.tasks_snippet }}"
+  include: "{{ snippet_dir }}/{{ driver.tasks_snippet }}"
   when: driver.tasks_snippet is defined and driver.tasks_snippet
 
 - name: Create any extra directories specified for this driver
