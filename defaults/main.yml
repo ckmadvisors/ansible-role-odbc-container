@@ -23,7 +23,8 @@ env_vars:
 dsn_connections: []
 
 # snippets and driver settings
-snippet_dir: "/src/snippets"
+snippet_dir: "snippets"
+snippet_abs_dir: "/src/{{ snippet_dir }}"
 dsn_snippets: []
 
 base_drivers:
