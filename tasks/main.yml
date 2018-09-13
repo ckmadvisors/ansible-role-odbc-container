@@ -20,6 +20,14 @@
   when: ansible_os_family == "Debian"
   tags: odbc, packages
 
+- name: Update CA certs for Debian
+  command: update-ca-certificates
+  when: ansible_os_family == "Debian"
+
+- name: Update CA certs for Red Hat
+  command: update-ca-trust
+  when: ansible_os_family == "RedHat"
+
 - include: install_driver.yml
   with_items: "{{ drivers }}"
   loop_control:

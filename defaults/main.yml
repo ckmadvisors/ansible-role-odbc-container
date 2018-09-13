@@ -12,6 +12,7 @@ yum_odbc_packages:
     - unixODBC-devel
 
 apt_odbc_packages:
+    - ca-certificates
     - unixodbc
     - unixodbc-dev
 
